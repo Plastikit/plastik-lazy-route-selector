@@ -21,6 +21,29 @@ bower install Plastikit/plastik-lazy-loader --save
 > _See [component page](https://www.plastikit.org/1.x/components/plastik-lazy-loader/)
 > for more details._
 
+`plastik-lazy-loader` can load both custom elements and templates.
+
+By default, `plastik-lazy-loader` will attempt to load a custom element
+that has the same name as the import's filename. For example, if the lazy loader sees
+`/pages/some-page.html`, it will assume that the custom element name is `some-page`.
+
+This behaviour can be overridden by setting an `element` attribute on the children of
+the page selector nested in `plastik-lazy-loader`. Whatever name is given
+in the `element` attribute will determine the name of the custom element that
+`plastik-lazy-loader` tries to instantiate.
+
+If a template is desired to be loaded instead of a custom element, add a `template`
+attribute to the page placeholders. If there are multiple templates in the file provided
+in the `import` attribute, then the `template` attribute can be set to the ID of the desired
+template.
+
+## Integrating into an application
+
+The following is a simple example of how `plastik-lazy-loader` can be
+used in an application.
+
+### Example
+
 ```html
 <more-route-config driver="path"></more-route-config>
 
