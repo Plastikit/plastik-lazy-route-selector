@@ -1,0 +1,31 @@
+paper-header-panel {
+  background: var(--paper-grey-200);
+}
+
+.basic-card {
+  display: block;
+  background: var(--paper-grey-50);
+  margin: 24px;
+  padding: 16px;
+  @apply(--shadow-elevation-2dp);
+}
+
+paper-toolbar {
+  @apply(--paper-font-title);
+}
+
+paper-button {
+  background: var(--paper-blue-500);
+  color: #fff;
+}
+
+a {
+  color: var(--paper-blue-600);
+  text-decoration: none;
+}
+
+
+a:focus, a:hover, a:active {
+  color: var(--paper-blue-800);
+  text-decoration: none;
+}

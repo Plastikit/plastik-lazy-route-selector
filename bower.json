@@ -1,0 +1,47 @@
+{
+  "name": "plastik-lazy-loader",
+  "version": "0.0.1",
+  "authors": [
+    "The Plastikit Authors <developers@plastikit.org>"
+  ],
+  "description": "Lazy loader for Polymer's more-routing client-side router",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "more-routing",
+    "selector",
+    "routing",
+    "router",
+    "lazyload",
+    "dynamic",
+    "async"
+  ],
+  "main": "plastik-lazy-loader.html",
+  "license": "BSD-3-Clause",
+  "homepage": "https://github.com/Plastikit/plastik-lazy-loader/",
+  "ignore": [
+    "/.*",
+    "/test/",
+    "/demo/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0",
+    "more-routing": "PolymerLabs/more-routing#^1.0.0"
+  },
+  "devDependencies": {
+    "iron-pages": "PolymerElements/iron-pages#^1.0.0",
+    "neon-animation": "PolymerElements/neon-animation#^1.0.0",
+    "paper-input": "PolymerElements/paper-input#^1.0.0",
+    "paper-item": "PolymerElements/paper-item#^1.0.0",
+    "paper-menu": "PolymerElements/paper-menu#^1.0.0",
+    "paper-button": "PolymerElements/paper-button#^1.0.0",
+    "paper-icon-button": "PolymerElements/paper-icon-button#^1.0.0",
+    "paper-drawer-panel": "PolymerElements/paper-drawer-panel#^1.0.0",
+    "paper-header-panel": "PolymerElements/paper-header-panel#^1.0.0",
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "test-fixture": "PolymerElements/test-fixture#^1.0.0",
+    "web-component-tester": "*",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  }
+}

@@ -1,0 +1,134 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>plastik-lazy-loader demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <link rel="import" href="../../polymer/polymer.html" />
+  <link rel="import" href="../../paper-styles/paper-styles.html" />
+  <link rel="import" href="../../paper-drawer-panel/paper-drawer-panel.html" />
+  <link rel="import" href="../../paper-header-panel/paper-header-panel.html" />
+  <link rel="import" href="../../paper-toolbar/paper-toolbar.html" />
+  <link rel="import" href="../../iron-icons/iron-icons.html" />
+  <link rel="import" href="../../paper-icon-button/paper-icon-button.html" />
+  <link rel="import" href="../../neon-animation/neon-animation.html" />
+  <link rel="import" href="../../paper-menu/paper-menu.html" />
+  <link rel="import" href="../../paper-item/paper-item.html" />
+  <link rel="import" href="../plastik-lazy-loader.html" />
+  <link rel="import" href="routes.html" />
+  <link rel="import" href="fade-in-on-top-animation.html" />
+  <link rel="import" href="stay-on-bottom-animation.html" />
+
+  <style is="custom-style">
+    body {
+      font: normal normal 400 16px 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    body.unresolved {
+      opacity: 0;
+    }
+    neon-animated-pages {
+      z-index: 0;
+    }
+    neon-animatable {
+      z-index: -1;
+    }
+    neon-animatable.iron-selected {
+      z-index: 1;
+    }
+    paper-menu paper-item, paper-menu a {
+      position: relative;
+      display: block;
+      height: 48px;
+      color: rgba(0, 0, 0, var(--dark-primary-opacity));
+      text-decoration: none;
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      padding: 0 16px;
+      -webkit-user-select: none;
+      user-select: none;
+      cursor: pointer;
+    }
+    paper-menu .iron-selected::after {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: currentColor;
+      opacity: 0.12;
+      content: '';
+    }
+    .basic-card {
+      display: block;
+      background: var(--paper-grey-50);
+      margin: 24px;
+      padding: 16px;
+      @apply(--shadow-elevation-2dp);
+    }
+    paper-toolbar {
+      @apply(--paper-font-title);
+    }
+    body, neon-animated-pages, neon-animatable > * {
+      background: var(--paper-grey-200);
+    }
+  </style>
+
+</head>
+<body class="unresolved">
+
+  <template id="t" is="dom-bind">
+
+    <paper-drawer-panel>
+
+      <paper-header-panel drawer>
+
+        <paper-toolbar>
+          <div>My App</div>
+        </paper-toolbar>
+
+        <paper-menu attr-for-selected="route" selected="{{route}}">
+          <paper-item route="root">Home</paper-item>
+          <paper-item route="users">Users</paper-item>
+          <paper-item route="help">Help</paper-item>
+        </paper-menu>
+
+      </paper-header-panel>
+
+      <plastik-lazy-loader main selected="{{route}}">
+        <neon-animated-pages attr-for-selected="route" class="fit" entry-animation="fade-in-on-top-animation" on-paper-drawer-toggle="toggleDrawer">
+          <neon-animatable route="root" import="myapp-home.html"></neon-animatable>
+          <neon-animatable route="users" element="myapp-users-page" import="myapp-users.html"></neon-animatable>
+          <neon-animatable route="help" template import="myapp-help.html"></neon-animatable>
+        </neon-animated-pages>
+      </plastik-lazy-loader>
+
+    </paper-drawer-panel>
+
+  </template>
+
+  <script>
+    (function() {
+      "use strict";
+
+      var template = document.querySelector('#t');
+
+      template.toggleDrawer = function() {
+        if (this.drawer) {
+          this.drawer.togglePanel();
+        }
+      };
+
+      template.listeners = {
+        'paper-drawer-toggle': 'toggleDrawer'
+      };
+
+      template.addEventListener('dom-change', function() {
+        this.drawer = document.querySelector('paper-drawer-panel');
+        document.body.classList.remove('unresolved');
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!--
+  Portions of this code have been adapted from the Polymer Project and the `app-router` element.
+  Plastikit is not affiliated with the original authors.
+
+  The original copyright notices are below.
+-->
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<!--
+The MIT License (MIT)
+
+Copyright (c) 2015 Erik Ringsmuth
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../more-routing/more-routing.html">
+
+<!--
+`plastik-lazy-loader` lazy-loads pages based on routes selected using
+the [`more-routing`](https://github.com/PolymerLabs/more-routing) element.
+
+`plastik-lazy-loader` can load both custom elements and templates.
+
+By default, `plastik-lazy-loader` will attempt to load a custom element
+that has the same name as the import's filename. For example, if the lazy loader sees
+`/pages/some-page.html`, it will assume that the custom element name is `some-page`.
+
+This behaviour can be overridden by setting an `element` attribute on the children of
+the page selector nested in `plastik-lazy-loader`. Whatever name is given
+in the `element` attribute will determine the name of the custom element that
+`plastik-lazy-loader` tries to instantiate.
+
+If a template is desired to be loaded instead of a custom element, add a `template`
+attribute to the page placeholders. If there are multiple templates in the file provided
+in the `import` attribute, then the `template` attribute can be set to the ID of the desired
+template.
+
+## Integrating into an application
+
+The following is a simple example of how `plastik-lazy-loader` can be
+used in an application.
+
+### Example
+
+```html
+<more-route-config driver="path" url-prefix="/myapp"></more-route-config>
+
+<more-route name="home" path="/">
+  <more-route name="users" path="/users">
+    <more-route name="user" path="/:userId"></more-route>
+  </more-route>
+  <more-route name="help" path="/help"></more-route>
+</more-route>
+
+<paper-drawer-panel>
+
+  <paper-header-panel drawer>
+
+    <paper-toolbar>
+      <div>My App</div>
+    </paper-toolbar>
+
+    <paper-menu attr-for-selected="route" selected="{{route}}">
+      <paper-item route="home">Home</paper-item>
+      <paper-item route="users">Users</paper-item>
+      <paper-item route="help">Help</paper-item>
+    </paper-menu>
+
+  </paper-header-panel>
+
+  <plastik-lazy-loader main selected="{{route}}">
+    <iron-pages attr-for-selected="route">
+      <div route="home" import="/pages/myapp-home.html"></div>
+      <div route="users" element="myapp-users-page" import="/pages/users.html"></div>
+      <div route="help" import="/pages/myapp-help.html"></div>
+    </iron-pages>
+  </plastik-lazy-loader>
+
+</paper-drawer-panel>
+```
+
+## Using with neon-animated-pages
+
+`plastik-lazy-loader` will automatically detect if the selector element provided to
+it inherits from `NeonAnimationRunnerBehavior`. If it does, it will wait for the
+`neon-animation-finish` event before it removes the lazy-loaded content from the page. No manual
+configuration is necessary.
+
+
+### Example
+
+```html
+<plastik-lazy-loader main selected="{{route}}">
+  <neon-animated-pages attr-for-selected="route"
+    entry-animation="fade-in-animation" exit-animation="fade-out-animation">
+    <neon-animatable route="home" import="/pages/myapp-home.html"></neon-animatable>
+    <neon-animatable route="users" import="/pages/myapp-users.html"></neon-animatable>
+    <neon-animatable route="help" import="/pages/myapp-help.html"></neon-animatable>
+  </neon-animated-pages>
+</plastik-lazy-loader>
+```
+
+@demo demo/
+-->
+<dom-module id="plastik-lazy-loader">
+  <template>
+    <more-route-selection
+        id="selection"
+        routes="[[routes]]"
+        on-more-route-change="_onMoreRouteChange">
+    </more-route-selection>
+    <content></content>
+  </template>
+</dom-module>
+<script>
+Polymer({
+  is: 'plastik-lazy-loader',
+  behaviors: [
+    MoreRouting.ContextAware,
+  ],
+  properties: {
+    /**
+     * The attribute to read route expressions from (on children).
+     */
+    routeAttribute: {
+      type: String,
+      value: 'route',
+    },
+    /**
+     * The routes managed by this element (inferred from the items that are
+     * defined by the selector it targets).
+     */
+    routes: {
+      type:     Array,
+      readOnly: true,
+      notify:   true,
+    },
+    /**
+     * The selected page, as defined by the selector inside of the element.
+     *
+     * This will return/accept an index or a string value depending on whether or not
+     * the child selector has `attrForSelected` set.
+     *
+     * Bind to this property instead of binding directly to the `selected` property
+     * of the child selector to ensure that imports are loaded before the selector
+     * changes pages.
+     */
+    selected: {
+      type:     String,
+      notify:   true,
+      observer: '_selectedChanged'
+    },
+    /**
+     * The selected `MoreRouting.Route` object, or `null`.
+     *
+     * @type {MoreRouting.Route}
+     */
+    selectedRoute: {
+      type:     Object,
+      value:    null,
+      readOnly: true,
+      notify:   true,
+    },
+    /**
+     * The index of the selected route (relative to `routes`). -1 when there
+     * is no active route.
+     */
+    selectedIndex: {
+      type:     Number,
+      value:    -1,
+      readOnly: true,
+      notify:   true,
+    },
+    /**
+     * The _full_ path expression of the selected route, or `null`.
+     */
+    selectedPath: {
+      type:     String,
+      readOnly: true,
+      notify:   true,
+    },
+    /**
+     * The params of the selected route, or an empty object if no route.
+     */
+    selectedParams: {
+      type:     Object,
+      readOnly: true,
+      notify:   true,
+    },
+  },
+  /**
+   * Fires when a new route is selected.
+   * @event more-route-selected
+   * @param {MoreRouting.Route} newRoute
+   * @param {MoreRouting.Route} oldRoute
+   * @param {number} newIndex
+   * @param {number} oldIndex
+   * @param {?string} newPath
+   * @param {?string} oldPath
+   * @param {Object} newParams
+   * @param {Object} oldParams
+   */
+  attached: function() {
+    this._managedSelector = this._findTargetSelector();
+    if (!this._managedSelector) {
+      console.warn(this, 'was built without a selector to manage. It will do nothing.');
+      return;
+    }
+
+    if (Polymer.NeonAnimationRunnerBehavior &&
+        ~this._managedSelector.behaviors
+          .indexOf(Polymer.NeonAnimationRunnerBehavior[
+            Polymer.NeonAnimationRunnerBehavior.length - 1
+          ])) {
+      this._animatedPages = true;
+      this._managedSelector.addEventListener(
+          'neon-animation-finish', this._animationFinished.bind(this));
+    }
+    this._updateRoutes();
+  },
+  _managedSelector: null,
+  _placeholdersToClear: [],
+  _lastSelected: null,
+  _animatedPages: false,
+  _importedUris: {},
+  /**
+   * Handle a change in selected item, driven by the `selected` property.
+   *
+   * Note that this will fail if a route is chosen that requires params not
+   * defined by the current URL.
+   */
+  _selectedChanged: function(selected, oldSelected) {
+    this._lastSelected = oldSelected;
+    if (this._settingSelection || !this._managedSelector) return;
+    var route = this._routeForItem(this._managedSelector._valueToItem(selected));
+    if (!route || typeof oldSelected === 'undefined') return;
+    route.navigateTo();
+  },
+  _getTopMostMatchingRoute: function(route) {
+    var parent = route, matchingRoute = route, depth = 0, child, cont;
+    while (parent.parent) {
+      parent = parent.parent;
+      depth += parent.depth;
+    }
+    var parts = MoreRouting.driver.currentPathParts;
+    parts.splice(0, depth);
+    if (!route.matchesPathParts(parts)) {
+      return route;
+    }
+    if (!route.numParams && !parts.length) {
+      return route;
+    }
+    do {
+      cont = false;
+      for (var i = 0; i < matchingRoute.children.length; i++) {
+        child = matchingRoute.children[i];
+        if (child.matchesPathParts(parts) &&
+            child.partsForParams(null, true) &&
+          ~this.routes.indexOf(child)) {
+          parts.splice(0, matchingRoute.depth);
+          matchingRoute = child;
+          cont = true;
+          break;
+        }
+      }
+    } while (cont);
+    return matchingRoute;
+  },
+  _urlMatchesRoute: function(route, url) {
+    var parts = Array.isArray(url) ? url
+      : MoreRouting.driver.splitPath(MoreRouting.driver.prefix + url);
+    route.matchesPathParts(parts);
+  },
+  _routeHasParent: function(route, parent) {
+    var parentRoute = route;
+    do {
+      if (parentRoute === parent) {
+        return true;
+      }
+    } while (parentRoute = route.parent);
+    return false;
+  },
+  _updateRoutes: function() {
+    var routes = [];
+    if (this._managedSelector) {
+      routes = this._managedSelector.items.map(this._routeForItem.bind(this));
+    }
+    this._setRoutes(routes);
+  },
+  _onMoreRouteChange: function(event) {
+    this._setSelectedRoute(event.detail.newRoute);
+    this._setSelectedIndex(event.detail.newIndex);
+    this._setSelectedPath(event.detail.newPath);
+    this._setSelectedParams(event.detail.newParams);
+    var route = this._getTopMostMatchingRoute(event.detail.newRoute);
+    if (!this._managedSelector) return;
+    this._settingSelection = true;
+    if (typeof this.selected === 'undefined') {
+      this.selected = this._valueForRoute(route);
+      this._selectByRoute(event.detail.newRoute);
+    } else {
+      this.selected = this._valueForRoute(route);
+    }
+    this._select(this.selected);
+    this._settingSelection = false;
+  },
+  _valueForRoute: function(route) {
+    var selected = '';
+    var index = this.routes.indexOf(route);
+    var attrForSelected = this._managedSelector.attrForSelected;
+    if (!attrForSelected) {
+      selected = index;
+    } else {
+      var item = this._managedSelector.items[index];
+      if (item)
+        selected = item[attrForSelected] || item.getAttribute(attrForSelected);
+    }
+    return selected;
+  },
+  _selectByRoute: function(route) {
+    // Make sure that we don't turn around and re-navigate
+    this._settingSelection = true;
+    this._managedSelector.select(this._valueForRoute(route));
+    this._settingSelection = false;
+  },
+  _findTargetSelector: function() {
+    var children = Polymer.dom(this).children;
+    if (children.length !== 1) {
+      console.error(this, 'expects only a single selector child');
+      return null;
+    }
+    var child = children[0];
+    if ('selected' in child && 'items' in child) {
+      return child;
+    } else {
+      console.error(this, 'can only manage children that are selectors');
+      return null;
+    }
+  },
+  _routeForItem: function(item) {
+    if (!item) return null;
+    if (item.moreRouteContext && item.moreRouteContext instanceof MoreRouting.Route) {
+      return item.moreRouteContext;
+    }
+    if (!item.hasAttribute(this.routeAttribute)) {
+      console.warn(item, 'is missing a context route or "' + this.routeAttribute + '" attribute');
+      return null;
+    }
+    var expression = item.getAttribute(this.routeAttribute);
+    var route      = MoreRouting.getRoute(expression, this.parentRoute);
+    // Associate the route w/ its element while we're here.
+    item.moreRouteContext = route;
+    return route;
+  },
+  _itemForRoute: function(route) {
+    if (!route) return null;
+    if (typeof route === 'string') {
+      route = MoreRouting.getRoute(route, this.parentRoute);
+    }
+    return this._managedSelector.items[this.routes.indexOf(route)];
+  },
+  _select: function(selected) {
+    var selectedItem = this._managedSelector._valueToItem(selected);
+    if (!selectedItem) {
+      return;
+    }
+    var route = this._routeForItem(selectedItem);
+    if (!route) {
+      return;
+    }
+    var uri = selectedItem.import || selectedItem.getAttribute('import');
+    if (!uri || typeof uri !== 'string') {
+      return;
+    }
+    this._import(selectedItem, route, uri);
+  },
+  _import: function(placeholder, route, uri) {
+    if (this._importedUris.hasOwnProperty(uri)) {
+      this._importLoaded(placeholder, route, uri, this._importedUris[uri]);
+    } else {
+      function importLoaded(e) {
+        if (!this._importedUris[uri]) {
+          this._importedUris[uri] = e.target.import;
+          this._importLoaded(placeholder, route, uri, this._importedUris[uri]);
+        }
+      }
+      this.importHref(uri, importLoaded, function(err) {
+        console.error(err);
+      });
+    }
+  },
+  _importLoaded: function(placeholder, route, uri, importDoc) {
+    // make sure the user didn't navigate to a different route while it loaded
+    if (route === this.selectedRoute) {
+      if (placeholder.hasAttribute('template')) {
+        // template
+        var templateId = placeholder.getAttribute('template');
+        var template;
+        if (templateId) {
+          template = importDoc.getElementById(templateId);
+        } else {
+          template = importDoc.querySelector('template');
+        }
+        if ('createInstance' in template) {
+          template = template.createInstance();
+        } else {
+          template = document.importNode(template.content, true);
+        }
+        this._placeImport(placeholder, template.stamp ? template.stamp() : template, route, uri);
+      } else {
+        // custom element
+        this._placeImport(placeholder,
+          document.createElement(placeholder.getAttribute('element') ||
+            uri.split('/').slice(-1)[0].replace('.html', '')), route, uri);
+      }
+    }
+  },
+  _placeImport: function(placeholder, element, route, uri) {
+    this._clearPlaceholder(placeholder);
+    Polymer.dom(placeholder).appendChild(element);
+
+    var oldPlaceholder = this._managedSelector._valueToItem(this._lastSelected);
+    if (oldPlaceholder === placeholder) {
+      oldPlaceholder = null;
+    }
+
+    if (this._animatedPages && oldPlaceholder) {
+      this.push('_placeholdersToClear', oldPlaceholder);
+    }
+
+    this._selectByRoute(route);
+
+    if (!this._animatedPages) {
+      this._clearPlaceholder(oldPlaceholder);
+    }
+  },
+  _clearPlaceholder: function(placeholder) {
+    if (placeholder) {
+      Polymer.dom(placeholder).innerHTML = '';
+    }
+  },
+  _animationFinished: function() {
+    for (var i = 0; i < this._placeholdersToClear.length; i++) {
+      if (this._managedSelector._valueForItem(this._placeholdersToClear[i])
+          !== this.selected) {
+        this._clearPlaceholder(this._placeholdersToClear[i]);
+      }
+    }
+    this._placeholdersToClear = [];
+  }
+});
+</script>

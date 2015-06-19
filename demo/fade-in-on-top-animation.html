@@ -1,0 +1,22 @@
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../neon-animation/neon-animation.html">
+
+<script>
+  Polymer({
+    is: 'fade-in-on-top-animation',
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+    configure: function(config) {
+      config.node.style.zIndex = 0;
+      this._effect = new KeyframeEffect(config.node, [
+        {'opacity': '0'},
+        {'opacity': '1'}
+      ], this.timingFromConfig(config));
+      return this._effect;
+    },
+    complete: function(config) {
+      config.node.style.zIndex = '';
+    }
+   });
+</script>
