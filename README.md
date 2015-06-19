@@ -5,7 +5,7 @@ plastik-lazy-loader
 the [`more-routing`](https://github.com/PolymerLabs/more-routing) element.
 
 Demos and documentation are available on the
-[component page](https://www.plastikit.org/1.x/components/plastik-lazy-loader/).
+[component page](http://www.plastikit.org/1.x/#!/components/plastik-lazy-loader).
 
 Pull requests are always welcome. If you encounter any bugs, please feel free to
 [submit an issue](https://github.com/Plastikit/plastik-lazy-loader/issues/new/).
@@ -18,7 +18,7 @@ bower install Plastikit/plastik-lazy-loader --save
 
 ## Basic usage
 
-> _See [component page](https://www.plastikit.org/1.x/components/plastik-lazy-loader/)
+> _See [component page](http://www.plastikit.org/1.x/#!/components/plastik-lazy-loader)
 > for more details._
 
 `plastik-lazy-loader` can load both custom elements and templates.
