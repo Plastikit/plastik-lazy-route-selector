@@ -1,5 +1,5 @@
 {
-  "name": "plastik-lazy-loader",
+  "name": "plastik-lazy-route-selector",
   "version": "0.0.1",
   "authors": [
     "The Plastikit Authors <developers@plastikit.org>"
@@ -17,9 +17,9 @@
     "dynamic",
     "async"
   ],
-  "main": "plastik-lazy-loader.html",
+  "main": "plastik-lazy-route-selector.html",
   "license": "BSD-3-Clause",
-  "homepage": "https://github.com/Plastikit/plastik-lazy-loader/",
+  "homepage": "https://github.com/Plastikit/plastik-lazy-route-selector/",
   "ignore": [
     "/.*",
     "/test/",

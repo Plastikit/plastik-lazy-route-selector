@@ -1,36 +1,36 @@
-plastik-lazy-loader
+plastik-lazy-route-selector
 ============
 
-`plastik-lazy-loader` lazy-loads pages based on routes selected using
+`plastik-lazy-route-selector` lazy-loads pages based on routes selected using
 the [`more-routing`](https://github.com/PolymerLabs/more-routing) element.
 
 Demos and documentation are available on the
-[component page](http://www.plastikit.org/1.x/#!/components/plastik-lazy-loader).
+[component page](http://www.plastikit.org/1.x/#!/components/plastik-lazy-route-selector).
 
 Pull requests are always welcome. If you encounter any bugs, please feel free to
-[submit an issue](https://github.com/Plastikit/plastik-lazy-loader/issues/new/).
+[submit an issue](https://github.com/Plastikit/plastik-lazy-route-selector/issues/new/).
 
 ## Installation
 
 ```sh
-bower install Plastikit/plastik-lazy-loader --save
+bower install Plastikit/plastik-lazy-route-selector --save
 ```
 
 ## Basic usage
 
-> _See [component page](http://www.plastikit.org/1.x/#!/components/plastik-lazy-loader)
+> _See [component page](http://www.plastikit.org/1.x/#!/components/plastik-lazy-route-selector)
 > for more details._
 
-`plastik-lazy-loader` can load both custom elements and templates.
+`plastik-lazy-route-selector` can load both custom elements and templates.
 
-By default, `plastik-lazy-loader` will attempt to load a custom element
+By default, `plastik-lazy-route-selector` will attempt to load a custom element
 that has the same name as the import's filename. For example, if the lazy loader sees
 `/pages/some-page.html`, it will assume that the custom element name is `some-page`.
 
 This behaviour can be overridden by setting an `element` attribute on the children of
-the page selector nested in `plastik-lazy-loader`. Whatever name is given
+the page selector nested in `plastik-lazy-route-selector`. Whatever name is given
 in the `element` attribute will determine the name of the custom element that
-`plastik-lazy-loader` tries to instantiate.
+`plastik-lazy-route-selector` tries to instantiate.
 
 If a template is desired to be loaded instead of a custom element, add a `template`
 attribute to the page placeholders. If there are multiple templates in the file provided
@@ -39,7 +39,7 @@ template.
 
 ## Integrating into an application
 
-The following is a simple example of how `plastik-lazy-loader` can be
+The following is a simple example of how `plastik-lazy-route-selector` can be
 used in an application.
 
 ### Example
@@ -70,20 +70,20 @@ used in an application.
 
  </paper-header-panel>
 
- <plastik-lazy-loader main selected="{{route}}">
+ <plastik-lazy-route-selector main selected="{{route}}">
    <iron-pages attr-for-selected="route">
      <div route="home" import="/pages/myapp-home.html"></div>
      <div route="users" element="myapp-users-page" import="/pages/users.html"></div>
      <div route="help" import="/pages/myapp-help.html"></div>
    </iron-pages>
- </plastik-lazy-loader>
+ </plastik-lazy-route-selector>
 
 </paper-drawer-panel>
 ```
 
 ## Using with neon-animated-pages
 
-`plastik-lazy-loader` will automatically detect if the selector element provided to
+`plastik-lazy-route-selector` will automatically detect if the selector element provided to
 it inherits from `NeonAnimationRunnerBehavior`. If it does, it will wait for the
 `neon-animation-finish` event before it removes the lazy-loaded content from the page. No manual
 configuration is necessary.
@@ -92,12 +92,12 @@ configuration is necessary.
 ### Example
 
 ```html
-<plastik-lazy-loader main selected="{{route}}">
+<plastik-lazy-route-selector main selected="{{route}}">
  <neon-animated-pages attr-for-selected="route"
    entry-animation="fade-in-animation" exit-animation="fade-out-animation">
    <neon-animatable route="home" import="/pages/myapp-home.html"></neon-animatable>
    <neon-animatable route="users" import="/pages/myapp-users.html"></neon-animatable>
    <neon-animatable route="help" import="/pages/myapp-help.html"></neon-animatable>
  </neon-animated-pages>
-</plastik-lazy-loader>
+</plastik-lazy-route-selector>
 ```

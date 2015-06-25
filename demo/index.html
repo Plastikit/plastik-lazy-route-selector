@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <title>plastik-lazy-loader demo</title>
+  <title>plastik-lazy-route-selector demo</title>
 
   <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
   <link rel="import" href="../../polymer/polymer.html" />
@@ -15,7 +15,7 @@
   <link rel="import" href="../../neon-animation/neon-animation.html" />
   <link rel="import" href="../../paper-menu/paper-menu.html" />
   <link rel="import" href="../../paper-item/paper-item.html" />
-  <link rel="import" href="../plastik-lazy-loader.html" />
+  <link rel="import" href="../plastik-lazy-route-selector.html" />
   <link rel="import" href="routes.html" />
   <link rel="import" href="fade-in-on-top-animation.html" />
   <link rel="import" href="stay-on-bottom-animation.html" />
@@ -96,13 +96,13 @@
 
       </paper-header-panel>
 
-      <plastik-lazy-loader main selected="{{route}}">
+      <plastik-lazy-route-selector main selected="{{route}}">
         <neon-animated-pages attr-for-selected="route" class="fit" entry-animation="fade-in-on-top-animation" on-paper-drawer-toggle="toggleDrawer">
           <neon-animatable route="root" import="myapp-home.html"></neon-animatable>
           <neon-animatable route="users" element="myapp-users-page" import="myapp-users.html"></neon-animatable>
           <neon-animatable route="help" template import="myapp-help.html"></neon-animatable>
         </neon-animated-pages>
-      </plastik-lazy-loader>
+      </plastik-lazy-route-selector>
 
     </paper-drawer-panel>
 
