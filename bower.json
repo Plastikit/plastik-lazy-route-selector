@@ -1,8 +1,8 @@
 {
   "name": "plastik-lazy-route-selector",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "authors": [
-    "The Plastikit Authors <developers@plastikit.org>"
+    "The Plastikit Project Authors <developers@plastikit.org>"
   ],
   "description": "Lazy loader for Polymer's more-routing client-side router",
   "keywords": [
