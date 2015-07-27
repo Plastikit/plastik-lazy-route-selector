@@ -398,6 +398,10 @@ Polymer({
     }
     var uri = selectedItem.import || selectedItem.getAttribute('import');
     if (!uri || typeof uri !== 'string') {
+      if(selectedItem.getAttribute('element')) {
+        // custom element without import
+        this._placeImport(selectedItem, document.createElement(selectedItem.getAttribute('element')), route, uri);
+      }
       return;
     }
     this._import(selectedItem, route, uri);
