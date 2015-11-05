@@ -45,7 +45,7 @@ used in an application.
 ### Example
 
 ```html
-<more-route-config driver="path"></more-route-config>
+<more-routing-config driver="path"></more-routing-config>
 
 <more-route name="home" path="/">
   <more-route name="users" path="/users">
